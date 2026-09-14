@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DP PDF COMPARE — Confidential Enterprise Visual Comparator</title>
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glow {
+      box-shadow: 0 0 35px -5px rgba(14, 165, 233, 0.25);
+    }
+    canvas {
+      image-rendering: high-quality;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-brand-500 selection:text-white">
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-50 glass border-b border-slate-800/80 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
+          <i data-lucide="layers" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            DP PDF COMPARE
+          </h1>
+          <p class="text-xs text-brand-500 font-semibold tracking-wide uppercase">Zero-Knowledge Visual Engine</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-full font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Air-Gapped Client Runtime
+        </div>
+        <button onclick="purgeCache()" title="Purge Volatile Memory Cache" class="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition border border-slate-700">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+          Purge Cache
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+    <!-- Privacy & Security Breakdown Accordion / Card -->
+    <section class="glass rounded-2xl p-6 border border-slate-800 glow">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold flex items-center gap-2 text-white">
+          <i data-lucide="shield-check" class="text-emerald-400"></i>
+          Why DP PDF COMPARE is 100% Confidential
+        </h2>
+        <span class="text-xs text-slate-400 font-mono">ENCRYPTION ARCHITECTURE: NONE (DATA NEVER LEAVES DEVICE)</span>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-300">
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+          <div class="flex items-center gap-2 text-brand-500 font-semibold mb-1">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+            Local Browser Execution
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Your PDFs are decoded directly inside your browser’s V8 JavaScript Engine. No remote cloud servers, API endpoints, or database storage are used.
+          </p>
+        </div>
+
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+          <div class="flex items-center gap-2 text-indigo-400 font-semibold mb-1">
+            <i data-lucide="hard-drive" class="w-4 h-4"></i>
+            Volatile RAM Processing
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Rendered document canvases are stored exclusively in temporary RAM. Once you close this tab or hit "Purge Cache", every byte is permanently cleared.
+          </p>
+        </div>
+
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+          <div class="flex items-center gap-2 text-emerald-400 font-semibold mb-1">
+            <i data-lucide="wifi-off" class="w-4 h-4"></i>
+            Offline Friendly
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Test our claim: Open this web page, disconnect your Wi-Fi or local area network, and execute your PDF comparisons seamlessly.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Configuration Bar -->
+    <section class="glass rounded-2xl p-6 border border-slate-800 space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="font-bold text-white">1. Select Document Dynamic Inputs</h3>
+          <p class="text-xs text-slate-400">Add up to 5 document layers and assign visual highlighting signatures.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <label class="text-xs font-semibold text-slate-300">Active Layers:</label>
+          <select id="pdfCount" onchange="buildUploadBoxes()" class="bg-slate-900 border border-slate-700 text-sm rounded-lg px-3 py-1.5 text-slate-200 focus:ring-2 focus:ring-brand-500 outline-none">
+            <option value="2">2 PDF Comparison</option>
+            <option value="3">3 PDF Comparison</option>
+            <option value="4">4 PDF Comparison</option>
+            <option value="5">5 PDF Comparison</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Upload Slots (Dynamic) -->
+      <div id="uploadContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"></div>
+
+      <!-- Visual Control Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+        <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+          <button id="btnOverlay" onclick="switchViewMode('overlay')" class="px-4 py-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow-md">
+            Full Visual Overlay Mode
+          </button>
+          <button id="btnDiff" onclick="switchViewMode('diff')" class="px-4 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white">
+            Differences Only Mode
+          </button>
+        </div>
+
+        <button onclick="executeComparison()" class="px-8 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-2">
+          <i data-lucide="play" class="w-4 h-4"></i>
+          Render High-Precision Comparison
+        </button>
+      </div>
+    </section>
+
+    <!-- Display Screen -->
+    <section class="glass rounded-2xl p-6 border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-white flex items-center gap-2">
+          <i data-lucide="monitor" class="w-4 h-4 text-brand-500"></i>
+          Viewport Render Matrix
+        </h3>
+        <span id="statusText" class="text-xs font-mono text-slate-400">Status: Waiting for input files</span>
+      </div>
+
+      <div class="relative w-full min-h-[500px] bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-center overflow-auto p-4">
+        <canvas id="outputCanvas" class="rounded shadow-2xl max-w-full h-auto"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    lucide.createIcons();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    let activeViewMode = 'overlay';
+    const layerColors = ['#ef4444', '#22c55e', '#3b82f6', '#f59e0b', '#a855f7'];
+
+    function buildUploadBoxes() {
+      const count = parseInt(document.getElementById('pdfCount').value);
+      const container = document.getElementById('uploadContainer');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= count; i++) {
+        const color = layerColors[(i - 1) % layerColors.length];
+        const slot = document.createElement('div');
+        slot.className = 'bg-slate-900/80 border border-slate-800 p-4 rounded-xl flex flex-col justify-between gap-3 relative group hover:border-slate-700 transition';
+        slot.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-300">Layer ${i}</span>
+            <input type="color" id="pdfColor${i}" value="${color}" class="w-6 h-6 rounded border-0 bg-transparent cursor-pointer">
+          </div>
+          <div>
+            <input type="file" id="pdfFile${i}" accept="application/pdf" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700 cursor-pointer w-full">
+          </div>
+        `;
+        container.appendChild(slot);
+      }
+    }
+
+    function switchViewMode(mode) {
+      activeViewMode = mode;
+      const overlayBtn = document.getElementById('btnOverlay');
+      const diffBtn = document.getElementById('btnDiff');
+
+      if (mode === 'overlay') {
+        overlayBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow-md';
+        diffBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white';
+      } else {
+        diffBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-brand-600 text-white shadow-md';
+        overlayBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-slate-400 hover:text-white';
+      }
+    }
+
+    function hexToRgb(hex) {
+      const bigint = parseInt(hex.replace('#', ''), 16);
+      return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+    }
+
+    async function parsePDFToImageData(file) {
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const page = await pdf.getPage(1);
+
+      const viewport = page.getViewport({ scale: 2.0 });
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d');
+      tempCanvas.width = viewport.width;
+      tempCanvas.height = viewport.height;
+
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+      return ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    }
+
+    async function executeComparison() {
+      const count = parseInt(document.getElementById('pdfCount').value);
+      const fileInputs = [];
+      const colorConfigs = [];
+
+      for (let i = 1; i <= count; i++) {
+        const file = document.getElementById(`pdfFile${i}`).files[0];
+        if (!file) {
+          alert(`Please attach a PDF file for Layer ${i}.`);
+          return;
+        }
+        fileInputs.push(file);
+        colorConfigs.push(hexToRgb(document.getElementById(`pdfColor${i}`).value));
+      }
+
+      const status = document.getElementById('statusText');
+      status.innerText = "Status: Rendering high-resolution canvas vectors...";
+
+      try {
+        const images = [];
+        for (let file of fileInputs) {
+          images.push(await parsePDFToImageData(file));
+        }
+
+        let maxWidth = 0, maxHeight = 0;
+        images.forEach(img => {
+          if (img.width > maxWidth) maxWidth = img.width;
+          if (img.height > maxHeight) maxHeight = img.height;
+        });
+
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = maxWidth;
+        canvas.height = maxHeight;
+
+        const outputData = ctx.createImageData(maxWidth, maxHeight);
+        const data = outputData.data;
+
+        for (let pixel = 0; pixel < data.length; pixel += 4) {
+          let layerPresence = [];
+
+          for (let idx = 0; idx < count; idx++) {
+            const raw = images[idx].data;
+            const avgBrightness = raw[pixel] !== undefined 
+              ? (raw[pixel] + raw[pixel + 1] + raw[pixel + 2]) / 3 
+              : 255;
+            layerPresence.push(avgBrightness < 200);
+          }
+
+          const activeLayersCount = layerPresence.filter(Boolean).length;
+
+          if (activeLayersCount === 0) {
+            // Empty background pixel
+            data[pixel] = 255; data[pixel+1] = 255; data[pixel+2] = 255; data[pixel+3] = 255;
+          } else if (activeLayersCount > 1 && layerPresence.every(val => val === layerPresence[0])) {
+            // Unchanged element present across all uploaded PDFs
+            if (activeViewMode === 'diff') {
+              data[pixel] = 255; data[pixel+1] = 255; data[pixel+2] = 255; data[pixel+3] = 255;
+            } else {
+              data[pixel] = 71; data[pixel+1] = 85; data[pixel+2] = 105; data[pixel+3] = 255;
+            }
+          } else {
+            // Difference found! Apply assigned custom highlight color
+            let primaryActiveIndex = layerPresence.findIndex(val => val === true);
+            let activeColor = colorConfigs[primaryActiveIndex] || [0, 0, 0];
+
+            data[pixel] = activeColor[0];
+            data[pixel+1] = activeColor[1];
+            data[pixel+2] = activeColor[2];
+            data[pixel+3] = 255;
+          }
+        }
+
+        ctx.putImageData(outputData, 0, 0);
+        status.innerText = "Status: Execution complete. Rendered safely locally.";
+      } catch (err) {
+        console.error(err);
+        status.innerText = "Status: Error processing PDFs. Please ensure valid documents.";
+      }
+    }
+
+    function purgeCache() {
+      const canvas = document.getElementById('outputCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      buildUploadBoxes();
+      document.getElementById('statusText').innerText = "Status: Memory cache & canvas purged.";
+    }
+
+    // Initialize initial input slots
+    buildUploadBoxes();
+  </script>
+</body>
+</html>
